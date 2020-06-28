@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+  <style>
+    p {
+      text-align: center;
+      font-size: 60px;
+      margin-top: 0px;
+    }
+    </style>
+  <!-- msrit Assist -->
+  <title>Kannada</title>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/gif/png" href="red.png">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+  <script type="text/javascript" src="js/exam.js"></script>
+
+
+  <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-database.js"></script>
+
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+</head>
+<body>
+
+
+
+<div class="fixed-top">
+
+  <nav class="navbar navbar-expand-lg navbar-dark mx-background-top-linear">
+    <div class="container">
+      <a class="navbar-brand" href="index.html" style="text-transform: uppercase;"> Authorship Identification</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+
+        <ul class="navbar-nav ml-auto">
+
+          <li class="nav-item active">
+           
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>
+
+
+<h2 id ="exam_head">Train ML Model</h2>
+<center>
+  <div class="col-auto" >
+    <button type="button"  value="start" id='startTrain'   onClick=startTrain() class="btn btn-primary mb-2">START</button>
+    
+    <p id="demo"></p>
+    <br>
+    <div id="train_div">
+        
+    </div>
+    
+  </div>
+</center>
+
+
+
+
+<!-- http://localhost:5000/login -->
+
+<div class="container" id="examf1" style="width:100%;display: none;">
+  <h2 id ="exam_head">Enter the text</h2>
+<br><br>
+    <div class="panel-group">
+      <div class="panel panel-primary">
+        <div class="panel-body">
+          <form name="usnform" action="http://localhost:5000/login" method="post" onsubmit="return validate()">
+            <div class="form-row align-items-center">
+              <div class="col-auto">
+                <label class="sr-only" for="inlineFormInputGroup"></label>
+                <div class="input-group mb-2">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text" >=></div>
+                  </div>
+                  <input type="text" class="form-control" id="inlineFormInputGroup" name="nm"  required=""  style="width: 550px;" >
+                </div>
+              </div>
+              <div class="col-auto">
+                <div class="form-check mb-2">
+                </div>
+              </div>
+
+              <div class="col-auto">
+                <button type="button"  value="text" onClick=putText() class="btn btn-primary mb-2">Submit</button>
+              </div>
+            </div>
+          </form>
+
+          <div id='result'>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyB_6OR0rAtv3xgCzQC45A0mjdzTW_KF2cw",
+    authDomain: "hackathon-ab821.firebaseapp.com",
+    databaseURL: "https://hackathon-ab821.firebaseio.com",
+    projectId: "hackathon-ab821",
+    storageBucket: "hackathon-ab821.appspot.com",
+    messagingSenderId: "407886884054",
+    appId: "1:407886884054:web:9b0c1709e25124bb"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  var ref = firebase.database().ref("Train/");
+  ref.set ({
+			status : "null",
+      text: "null"	
+		});
+  var ref = firebase.database().ref("Test/");
+  ref.set ({
+    "author" : "null",
+    "Prediction array": "null",	
+    "Prediction Probability": "null",	
+			});
+  var ref = firebase.database().ref("msg/");
+  ref.set ({
+			status : "null"
+		});
+
+
+
+  var event_listener = firebase.database().ref('Train')
+  event_listener.on('child_changed', function(snapshot) {
+    console.log(snapshot.val());
+    if (snapshot.val().includes('trained') && snapshot.val() !== 'trained')
+    {
+      document.getElementById('startTrain').innerHTML = "Completed";
+      document.getElementById("startTrain").style.backgroundColor = "green"
+      train_div = document.getElementById('train_div')
+      train_div.innerHTML = "Training Completed Successfully! Accuracy rate: "+ snapshot.val().replace('trained_','')
+      
+      document.getElementById('examf1').style.display = "block";
+      document.getElementById('demo').style.display = "none";
+    }
+});
+  
+  var msg_listener = firebase.database().ref('msg')
+  msg_listener.on('child_changed', function(snapshot) {
+    console.log(snapshot.val());
+    if (snapshot.val() !== 'null')
+    {
+      train_div = document.getElementById('train_div')
+      linebreak = document.createElement("br");
+      text_line = document.createElement("h6")
+      text_line.innerHTML = snapshot.val()
+      train_div.appendChild(text_line)
+    }
+      
+});
+
+  var test_listener = firebase.database().ref('Test')
+  test_listener.on('child_changed', function(snapshot) {
+    console.log(snapshot.val());
+    if (snapshot.val() !== 'null')
+    {
+      result_div = document.getElementById('result')
+      text_line = document.createElement("h5")
+      if(snapshot.val().includes('_author'))
+      text_line.innerHTML = 'Author Name: '+snapshot.val().replace('_author','').split('_').join('')
+      else
+      text_line.innerHTML = snapshot.val()
+      result_div.appendChild(text_line)
+    }
+      
+});
+
+  
+  function startTrain()
+  {
+    document.getElementById('startTrain').innerHTML = "Training...";
+    document.getElementById("startTrain").style.backgroundColor = "red"
+    var ref = firebase.database().ref("Train/");
+    ref.set ({
+			status : "start",
+      text: "null"
+		});
+
+    console.log('hey')
+    var countDownDate = addMinutes(83);
+    console.log(countDownDate)
+// Update the count down every 1 second
+var x = setInterval(function() {
+
+  // Get today's date and time
+  var now = new Date().getTime();
+    
+  // Find the distance between now and the count down date
+  var distance = countDownDate - now;
+    
+  // Time calculations for days, hours, minutes and seconds
+  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    
+  // Output the result in an element with id="demo"
+  document.getElementById("demo").innerHTML = minutes + "m " + seconds + "s ";
+    
+  // If the count down is over, write some text 
+  if (distance < 0) {
+    clearInterval(x);
+    document.getElementById("demo").innerHTML = "";
+  }
+}, 1000);
+    
+    
+  }
+  function putText()
+  {
+    var text1 = document.getElementById('inlineFormInputGroup').value
+    console.log(text1)
+    document.getElementById('result').innerHTML='';
+    var ref = firebase.database().ref("Train/");
+    ref.set ({
+			status : "trained",
+      text: text1
+		});
+
+  }
+  function addMinutes(minutes) {
+    var d = new Date();
+    var n = d.getTime();
+    console.log(n + minutes*1000)
+    return (n + minutes*1000);
+}
+
+</script>
+
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+</body>
+</html>

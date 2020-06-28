@@ -1,0 +1,16 @@
+python3 main.py --articles_per_author 12 --authors_to_keep 3 --model RandomForest
+
+
+python3 main.py --articles_per_author 12 --authors_to_keep 3 --model RandomForest --id 1
+
+
+
+python3 main.py --articles_per_author 12 --authors_to_keep 3 --model knn
+python3 main.py --articles_per_author 12 --authors_to_keep 3 --model NaiveBayes
+python3 main.py --articles_per_author 12 --authors_to_keep 3 --model svm
+
+
+0 data_somashekar
+1 data_hrudayashiva
+2 data_ravi_belegere
+
